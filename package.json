@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.19",
     "@prisma/client": "^6.1.0",
     "daisyui": "^4.12.23",
     "next": "15.1.3",
