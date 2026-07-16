@@ -1,9 +1,9 @@
+import Wrapper from "./components/Wrapper";
+
 export default function page() {
   return (
-    <div>
-      <button className="btn btn-accent">
-        test
-      </button>
-    </div>
+     <Wrapper>
+      salam
+     </Wrapper>
   )
 } 
