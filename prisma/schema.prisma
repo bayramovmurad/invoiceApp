@@ -33,7 +33,7 @@ model Invoice {
   status        Int           @default(1)
   lines         InvoiceLine[] @relation("InvoiceLines")
   userId        String
-  createdById   User          @relation("UserInvoices", fields: [userId], references: [id])
+  createdById   User           @relation("UserInvoices", fields: [userId], references: [id])
 }
 
 model InvoiceLine {

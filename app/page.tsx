@@ -2,8 +2,10 @@
 import Wrapper from "./components/Wrapper";
 import { Layers } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createEmptyInvoice } from "./actions";
+import { createEmptyInvoice, getInvoicesByEmail } from "./actions";
 import { useUser } from "@clerk/nextjs";
+import InvoiceComponent from "./components/InvoiceComponent";
+import { Invoice } from "@/type";
 
 
 export default function Home() {
@@ -11,7 +13,24 @@ export default function Home() {
   const [invoiceName, setInvoiceName] = useState("");
   const [isNameValid, setIsNameValid] = useState(true);
   const email = user?.primaryEmailAddress?.emailAddress as string;
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
+
+  const fetchInvoices  = async () => {
+    try {
+      const data = await getInvoicesByEmail(email)
+      if(data){
+        setInvoices(data)
+      }
+    } catch (error) {
+      console.log("Error creating invoice:", error);
+      
+    }
+  };
+
+  useEffect(() => {
+    fetchInvoices()
+  },[email])
 
   useEffect(() => {
     setIsNameValid(invoiceName.length <= 60);
@@ -51,6 +70,13 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {invoices.length > 0 &&
+          invoices.map((invoice, index) => (
+            <div key={index}>
+              <InvoiceComponent invoice={invoice} index={index} />
+            </div>
+          ))}
 
         <dialog id="my_modal_3" className="modal">
           <div className="modal-box">
