@@ -2,7 +2,7 @@
 
 import { SignIn } from "@clerk/react";
 
-export default function page() {
+export default function Page() {
   return (
     <div className="hero bg-base-200 min-h-screen">
       <div className="hero-content text-center">

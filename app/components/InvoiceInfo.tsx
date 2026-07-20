@@ -33,7 +33,7 @@ export default function InvoiceInfo({ invoice, setInvoice }:Props){
           value={invoice?.issuerAddress}
           placeholder="Address of the issuing company"
           className="textarea textarea-bordered w-full resize-none h-40"
-          aria-rowcount={5}
+          rows={5}
           required
           onChange={(e) => handleInputChange(e, "issuerAddress")}></textarea>
 
@@ -51,7 +51,7 @@ export default function InvoiceInfo({ invoice, setInvoice }:Props){
           value={invoice?.clientAddress}
           placeholder="Address of the client company"
           className="textarea textarea-bordered w-full resize-none h-40"
-          aria-rowcount={5}
+          rows={5}
           required
           onChange={(e) => handleInputChange(e, "clientAddress")}></textarea>
 

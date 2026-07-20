@@ -4,7 +4,6 @@ import Link from "next/link";
 
 type InvoiceComponentProps = {
   invoice: Invoice;
-  index: number;
 };
 
 const getStatusBadge = (status: number) => {
@@ -56,7 +55,6 @@ const getStatusBadge = (status: number) => {
 
 export default function InvoiceComponent({
   invoice,
-  index,
 }: InvoiceComponentProps) {
     
   const calculateTotal = () => {

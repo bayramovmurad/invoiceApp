@@ -8,9 +8,9 @@ import Wrapper from "@/app/components/Wrapper";
 import { Invoice, Totals } from "@/type";
 import { Save, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
-export default function page({
+export default function Page({
   params,
 }: {
   params: Promise<{ invoiceId: string }>;
@@ -22,7 +22,7 @@ export default function page({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const fetchInvoice = async () => {
+  const fetchInvoice = useCallback(async () => {
     try {
       const { invoiceId } = await params;
       const fetchedInvoice = await getInvoiceById(invoiceId);
@@ -33,11 +33,11 @@ export default function page({
     } catch (error) {
       console.error(error);
     }
-  };
+  },[params]);
 
   useEffect(() => {
     fetchInvoice();
-  }, []);
+  }, [fetchInvoice]);
 
   useEffect(() => {
     if (!invoice) return;
