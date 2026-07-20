@@ -3,6 +3,7 @@
 import { deleteInvoice, getInvoiceById, updateInvoice } from "@/app/actions";
 import InvoiceInfo from "@/app/components/InvoiceInfo";
 import InvoiceLines from "@/app/components/InvoiceLines";
+import InvoicePDF from "@/app/components/InvoicePDF";
 import VATControl from "@/app/components/VatControl";
 import Wrapper from "@/app/components/Wrapper";
 import { Invoice, Totals } from "@/type";
@@ -174,6 +175,7 @@ export default function Page({
 
           <div className="flex w-full md:w-2/3 flex-col md:ml-4">
             <InvoiceLines invoice={invoice} setInvoice={setInvoice} />
+            <InvoicePDF invoice={invoice} totals={totals} />
           </div>
         </div>
       </div>
