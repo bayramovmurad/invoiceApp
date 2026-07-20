@@ -14,12 +14,8 @@ export default function Navbar() {
   const navLinks = [
     {
       href: "/",
-      label: "Factures",
-    },
-    {
-      href: "/test",
-      label: "tt",
-    },
+      label: "Invoices",
+    }
   ];
 
       useEffect(() => {

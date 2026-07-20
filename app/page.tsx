@@ -4,9 +4,9 @@ import { Layers } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createEmptyInvoice, getInvoicesByEmail } from "./actions";
 import { useUser } from "@clerk/nextjs";
-import InvoiceComponent from "./components/InvoiceComponent";
-import { Invoice } from "@/type";
 
+import { Invoice } from "@/type";
+import InvoiceComponent from "./components/InvoiceComponent";
 
 export default function Home() {
   const { user } = useUser();
@@ -15,22 +15,20 @@ export default function Home() {
   const email = user?.primaryEmailAddress?.emailAddress as string;
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
-
-  const fetchInvoices  = async () => {
+  const fetchInvoices = async () => {
     try {
-      const data = await getInvoicesByEmail(email)
-      if(data){
-        setInvoices(data)
+      const data = await getInvoicesByEmail(email);
+      if (data) {
+        setInvoices(data);
       }
     } catch (error) {
-      console.log("Error creating invoice:", error);
-      
+      console.error("Error loading invoices", error);
     }
   };
 
   useEffect(() => {
-    fetchInvoices()
-  },[email])
+    fetchInvoices();
+  }, [email]);
 
   useEffect(() => {
     setIsNameValid(invoiceName.length <= 60);
@@ -41,20 +39,21 @@ export default function Home() {
       if (email) {
         await createEmptyInvoice(email, invoiceName);
       }
+      fetchInvoices();
       setInvoiceName("");
       const modal = document.getElementById("my_modal_3") as HTMLDialogElement;
       if (modal) {
         modal.close();
       }
     } catch (error) {
-      console.error("Error creating invoice:", error);
+      console.error("Error loading invoices", error);
     }
   };
 
   return (
     <Wrapper>
       <div className="flex flex-col space-y-4">
-        <h1 className="text-lg font-bold">My Factures</h1>
+        <h1 className="text-lg font-bold">My Invoices</h1>
 
         <div className=" grid md:grid-cols-3 gap-4">
           <div
@@ -64,19 +63,19 @@ export default function Home() {
                 document.getElementById("my_modal_3") as HTMLDialogElement
               ).showModal()
             }>
-            <div className="font-bold text-accent">Create a Facture</div>
+            <div className="font-bold text-accent">Create An Invoice</div>
             <div className="bg-accent-content text-accent  rounded-full p-2 mt-2">
               <Layers className="h-6 w-6" />
             </div>
           </div>
-        </div>
 
-        {invoices.length > 0 &&
-          invoices.map((invoice, index) => (
-            <div key={index}>
-              <InvoiceComponent invoice={invoice} index={index} />
-            </div>
-          ))}
+          {invoices.length > 0 &&
+            invoices.map((invoice, index) => (
+              <div key={index}>
+                <InvoiceComponent invoice={invoice} index={index} />
+              </div>
+            ))}
+        </div>
 
         <dialog id="my_modal_3" className="modal">
           <div className="modal-box">
@@ -86,18 +85,20 @@ export default function Home() {
               </button>
             </form>
 
-            <h3 className="font-bold text-lg">New Facture</h3>
+            <h3 className="font-bold text-lg">New Invoice</h3>
 
             <input
               type="text"
-              placeholder="cant be more than 60"
+              placeholder="The name cannot exceed 60 characters."
               className="input input-bordered w-full my-4"
               value={invoiceName}
               onChange={(e) => setInvoiceName(e.target.value)}
             />
 
             {!isNameValid && (
-              <p className="mb-4 text-sm">cant be more than 60</p>
+              <p className="mb-4 text-sm">
+                Le nom ne peut pas dépasser 60 caractères.
+              </p>
             )}
 
             <button

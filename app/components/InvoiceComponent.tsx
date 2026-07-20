@@ -84,7 +84,7 @@ export default function InvoiceComponent({
       <div className="w-full">
         <div>
           <div className="stat-title">
-            <div className="uppercase text-sm">FACT-{invoice.id}</div>
+            <div className="uppercase text-sm">Inv-{invoice.id}</div>
           </div>
           <div>
             <div className="stat-value">{calculateTotal().toFixed(2)} €</div>

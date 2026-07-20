@@ -1,8 +1,8 @@
 "use server"
 
 import prisma from "@/lib/prisma";
+import { Invoice } from "@/type";
 import { randomBytes } from "crypto";
-
 
 export async function checkAndAddUser(email: string, name: string) {
     if (!email) return;
@@ -42,10 +42,8 @@ const generateUniqueId = async () => {
             isUnique = true;
         }
     }
-
-    return uniqueId;
-
-};
+    return uniqueId
+}
 
 export async function createEmptyInvoice(email: string, name: string) {
     try {
@@ -53,9 +51,9 @@ export async function createEmptyInvoice(email: string, name: string) {
             where: {
                 email: email
             }
-        });
+        })
 
-        const invoiceId = await generateUniqueId() as string;
+        const invoiceId = await generateUniqueId() as string
 
         if (user) {
             const newInvoice = await prisma.invoice.create({
@@ -75,14 +73,12 @@ export async function createEmptyInvoice(email: string, name: string) {
             })
         }
     } catch (error) {
-        console.log(error);
-
+        console.error(error)
     }
-};
+}
 
 export async function getInvoicesByEmail(email: string) {
     if (!email) return;
-
     try {
         const user = await prisma.user.findUnique({
             where: {
@@ -90,38 +86,151 @@ export async function getInvoicesByEmail(email: string) {
             },
             include: {
                 invoices: {
-                    include:{
-                        lines: true
+                    include: {
+                        lines: true,
                     }
                 }
             }
         })
-        // Status possibles :
-        // 1: draft
-        // 2: pending
-        // 3: paid
-        // 4: cancel
-        // 5: unpaid
-
-        if(user){
-            const today = new Date();
+        // Possible status :
+        // 1: Draft
+        // 2: Pending
+        // 3: Paid
+        // 4: Cancel
+        // 5: UnPaid
+        if (user) {
+            const today = new Date()
             const updatedInvoices = await Promise.all(
                 user.invoices.map(async (invoice) => {
                     const dueDate = new Date(invoice.dueDate)
-                    if(
-                        dueDate < today && invoice.status == 2
-                    ){
+                    if (
+                        dueDate < today &&
+                        invoice.status == 2
+                    ) {
                         const updatedInvoice = await prisma.invoice.update({
-                            where:{id: invoice.id},
-                            data: {status: 5},
-                            include: {lines:true}
+                            where: { id: invoice.id },
+                            data: { status: 5 },
+                            include: { lines: true }
                         })
-                        return updatedInvoice;
+                        return updatedInvoice
                     }
                     return invoice
                 })
             )
             return updatedInvoices
+
+        }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function getInvoiceById(invoiceId: string) {
+    try {
+        const invoice = await prisma.invoice.findUnique({
+            where: { id: invoiceId },
+            include: {
+                lines: true
+            }
+        })
+        if (!invoice) {
+            throw new Error("Invoice not found");
+        }
+        return invoice
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function updateInvoice(invoice: Invoice) {
+    try {
+        const existingInvoice = await prisma.invoice.findUnique({
+            where: { id: invoice.id },
+            include: {
+                lines: true
+            }
+        })
+
+        if (!existingInvoice) {
+            throw new Error(`Invoixe with l'ID ${invoice.id} not found.`);
+        }
+
+        await prisma.invoice.update({
+            where: { id: invoice.id },
+            data: {
+                issuerName: invoice.issuerName,
+                issuerAddress: invoice.issuerAddress,
+                clientName: invoice.clientName,
+                clientAddress: invoice.clientAddress,
+                invoiceDate: invoice.invoiceDate,
+                dueDate: invoice.dueDate,
+                vatActive: invoice.vatActive,
+                vatRate: invoice.vatRate,
+                status: invoice.status,
+            },
+        })
+
+        const existingLines = existingInvoice.lines
+
+        const receivedLines = invoice.lines
+
+        const linesToDelete = existingLines.filter(
+            (existingLine) => !receivedLines.some((line) => line.id === existingLine.id)
+        )
+
+        if (linesToDelete.length > 0) {
+            await prisma.invoiceLine.deleteMany({
+                where: {
+                    id: { in: linesToDelete.map((line) => line.id) }
+                }
+            })
+        }
+
+        for (const line of receivedLines) {
+            const existingLine = existingLines.find((l) => l.id == line.id)
+            if (existingLine) {
+                const hasChanged =
+                    line.description !== existingLine.description ||
+                    line.quantity !== existingLine.quantity ||
+                    line.unitPrice !== existingLine.unitPrice;
+
+                if (hasChanged) {
+                    await prisma.invoiceLine.update({
+                        where: { id: line.id },
+                        data: {
+                            description: line.description,
+                            quantity: line.quantity,
+                            unitPrice: line.unitPrice,
+
+                        }
+                    })
+                }
+            } else {
+                //create a new line
+                await prisma.invoiceLine.create({
+                    data: {
+                        description: line.description,
+                        quantity: line.quantity,
+                        unitPrice: line.unitPrice,
+                        invoiceId: invoice.id
+                    }
+                })
+
+            }
+        }
+
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export async function deleteInvoice(invoiceId: string) {
+    try {
+        const deleteInvoice = await prisma.invoice.delete({
+            where: { id: invoiceId }
+        })
+        if (!deleteInvoice) {
+            throw new Error("Error loading invoices.");
         }
     } catch (error) {
         console.error(error)
